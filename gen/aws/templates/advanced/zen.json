@@ -16,22 +16,9 @@
           "Description" : "\nExisting VPC to use. Nodes will be launched using subnets and Internet Gateway under this VPC",
           "Type": "AWS::EC2::VPC::Id"
         },
-        "PublicSubnet": {
-          "Description" : "\nSubnet ID for use by all public agent nodes",
-          "Type": "AWS::EC2::Subnet::Id"
-        },
         "PrivateSubnet": {
           "Description" : "\nSubnet ID for use by all private agent nodes",
           "Type": "AWS::EC2::Subnet::Id"
-        },
-        "InternetGateway": {
-          "Description" : "\nInternet Gateway ID, must be attached to the 'Vpc'. Used by all nodes for outgoing Internet access.",
-          "Type": "String"
-        },
-        "PublicAgentInstanceCount": {
-          "Type": "Number",
-          "Default": "5",
-          "Description": "\nSpecify the number of public agent nodes or accept the default."
         },
         "PrivateAgentInstanceCount": {
           "Type": "Number",
@@ -40,21 +27,16 @@
         },
         "MasterInstanceType": {
           "Type": "String",
-          "Default": "m3.xlarge",
-          "Description" : "\nRegion-specific instance type. E.g. m3.xlarge"
-        },
-        "PublicAgentInstanceType": {
-          "Type": "String",
-          "Default": "m3.xlarge",
+          "Default": "m3.2xlarge",
           "Description" : "\nRegion-specific instance type. E.g. m3.xlarge"
         },
         "PrivateAgentInstanceType": {
           "Type": "String",
-          "Default": "m3.xlarge",
+          "Default": "m4.10xlarge",
           "Description" : "\nRegion-specific instance type. E.g. m3.xlarge"
         },
         "CustomAMI": {
-          "Default": "default",
+          "Default": "ami-1ad0000c",
           "Type": "String",
           "Description": "\nExisting AMI in the deploy region which has all DC/OS pre-requisites installed or 'default'",
           "AllowedPattern": "(default|ami-[a-f0-9]{8})"
@@ -92,9 +74,6 @@
                     },
                     "Vpc": {
                       "Ref": "Vpc"
-                    },
-                    "PublicSubnet": {
-                      "Ref": "PublicSubnet"
                     },
                     "PrivateSubnet": {
                       "Ref": "PrivateSubnet"

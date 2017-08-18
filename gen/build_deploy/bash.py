@@ -287,7 +287,7 @@ function check_all() {
     echo -e "${BOLD}Running preflight checks${NORMAL}"
     AGENT_ONLY=0
     for ROLE in $ROLES; do
-        if [[ $ROLE = "slave" || $ROLE = "slave_public" ]]; then
+        if [[ $ROLE = "slave" ]]; then
             AGENT_ONLY=1
             break
         fi
@@ -401,7 +401,7 @@ function check_all() {
             check_service $service
         done
     else
-        # agent / public agent node service checks
+        # agent node service checks
         for service in \
             "53 spartan" \
             "5051 mesos-agent" \
@@ -423,8 +423,8 @@ function check_all() {
 
     for role in "$ROLES"
     do
-        if [ "$role" != "master" -a "$role" != "slave" -a "$role" != "slave_public" -a "$role" != "minuteman" ]; then
-            echo -e "${RED}FAIL Invalid role $role. Role must be one of {master,slave,slave_public}${NORMAL}"
+        if [ "$role" != "master" -a "$role" != "slave" -a "$role" != "minuteman" ]; then
+            echo -e "${RED}FAIL Invalid role $role. Role must be one of {master,slave}${NORMAL}"
             (( OVERALL_RC += 1 ))
         fi
     done

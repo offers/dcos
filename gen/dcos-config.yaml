@@ -54,16 +54,6 @@ package:
         "bind_ip_blacklist": {{ dns_bind_ip_blacklist }},
         "forward_zones": {{ dns_forward_zones }}
       }
-  - path: /etc_slave_public/spartan.json
-    content: |
-      {
-        "upstream_resolvers": {{ resolvers }},
-        "bind_interface": "spartan",
-        "udp_port": 53,
-        "tcp_port": 53,
-        "bind_ip_blacklist": {{ dns_bind_ip_blacklist }},
-        "forward_zones": {{ dns_forward_zones }}
-      }
   - path: /etc_master/spartan.json
     content: |
       {
@@ -463,11 +453,6 @@ package:
   - path: /etc/mesos-slave
     content: |
       MESOS_RESOURCES=[{"name":"ports","type":"RANGES","ranges": {"range": [{"begin": 1025, "end": 2180},{"begin": 2182, "end": 3887},{"begin": 3889, "end": 5049},{"begin": 5052, "end": 8079},{"begin": 8082, "end": 8180},{"begin": 8182, "end": 32000}]}}]
-  - path: /etc/mesos-slave-public
-    content: |
-      MESOS_RESOURCES=[{"name":"ports","type":"RANGES","ranges": {"range": [{"begin": 1, "end": 21},{"begin": 23, "end": 5050},{"begin": 5052, "end": 32000}]}}]
-      MESOS_DEFAULT_ROLE=slave_public
-      MESOS_ATTRIBUTES=public_ip:true
   - path: /etc/mesos-executor-environment.json
     content: |
       {
@@ -489,11 +474,6 @@ package:
     content: |
       {
         "role": "agent"
-      }
-  - path: /etc_slave_public/dcos-log-config.json
-    content: |
-      {
-        "role": "agent_public"
       }
   - path: /etc/dns_search_config
     content: |
@@ -539,13 +519,6 @@ package:
     content: |
       {
         "role": "agent",
-        "endpoint-config": "/opt/mesosphere/etc/dcos-diagnostics-endpoint-config.json",
-        "agent-port": 61001
-      }
-  - path: /etc_slave_public/dcos-diagnostics-config.json
-    content: |
-      {
-        "role": "agent_public",
         "endpoint-config": "/opt/mesosphere/etc/dcos-diagnostics-endpoint-config.json",
         "agent-port": 61001
       }
@@ -696,27 +669,27 @@ package:
               {
                   "Port": 5051,
                   "Uri": "/__processes__",
-                  "Role":["agent", "agent_public"]
+                  "Role":["agent"]
               },
               {
                   "Port": 5051,
                   "Uri": "/metrics/snapshot",
-                  "Role":["agent", "agent_public"]
+                  "Role":["agent"]
               },
               {
                   "Port": 5051,
                   "Uri": "/slave/flags",
-                  "Role":["agent", "agent_public"]
+                  "Role":["agent"]
               },
               {
                   "Port": 5051,
                   "Uri": "/slave/state",
-                  "Role":["agent", "agent_public"]
+                  "Role":["agent"]
               },
               {
                   "Port": 5051,
                   "Uri": "/system/stats.json",
-                  "Role":["agent", "agent_public"]
+                  "Role":["agent"]
               },
               {
                   "Port": 8123,
@@ -959,9 +932,6 @@ package:
       ssl_protocols TLSv1.1 TLSv1.2;
 {% endswitch %}
   - path: /etc_slave/adminrouter-listen-open.conf
-    content: |
-        listen 61001 default_server;
-  - path: /etc_slave_public/adminrouter-listen-open.conf
     content: |
         listen 61001 default_server;
 {% switch exhibitor_admin_password_enabled %}

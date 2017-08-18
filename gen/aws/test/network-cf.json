@@ -16,10 +16,6 @@
     "PrivateSubnetRange" : {
       "Description" : "CIDR of private subnet. Should be a subset of VPC Subnet",
       "Type" : "String"
-    },
-    "PublicSubnetRange" : {
-      "Description" : "CIDR of public subnet. Should be a subset of VPC Subnet",
-      "Type" : "String"
     }
   },
   "Resources" : {
@@ -31,17 +27,6 @@
         "CidrBlock" : { "Ref" : "VpcSubnetRange" },
         "Tags" : [
           { "Key" : "Name", "Value" : { "Fn::Join" : [ "", [ "vpc-", { "Ref" : "AWS::StackName" } ] ] } }
-        ]
-      }
-    },
-    "PublicSubnet" : {
-      "Type" : "AWS::EC2::Subnet",
-      "DependsOn" : "Vpc",
-      "Properties" : {
-        "VpcId" : { "Ref" : "Vpc" },
-        "CidrBlock" : { "Ref" : "PublicSubnetRange" },
-        "Tags" : [
-          { "Key" : "Name", "Value" : { "Fn::Join" : [ "", [ "public-", { "Ref" : "AWS::StackName" } ] ] } }
         ]
       }
     },
@@ -95,10 +80,6 @@
     "Vpc" : {
       "Description" : "Vpc ID",
       "Value" : { "Ref": "Vpc" }
-    },
-    "PublicSubnet" : {
-      "Description" : "Public Subnet ID",
-      "Value" : { "Ref": "PublicSubnet" }
     },
     "PrivateSubnet" : {
       "Description" : "Private Subnet ID",

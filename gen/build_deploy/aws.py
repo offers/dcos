@@ -38,10 +38,9 @@ aws_base_source = Source(entry={
     'default': {
         'platform': 'aws',
         'resolvers': '["169.254.169.253"]',
-        'num_private_slaves': '5',
-        'num_public_slaves': '1',
+        'num_private_slaves': '11',
         'os_type': '',
-        'aws_masters_have_public_ip': 'true',
+        'aws_masters_have_public_ip': 'false',
         'enable_docker_gc': 'true'
     },
     'must': {
@@ -65,7 +64,6 @@ aws_base_source = Source(entry={
         # The cloud_config template variables pertaining to "cloudformation.json"
         'master_cloud_config': '{{ master_cloud_config }}',
         'agent_private_cloud_config': '{{ slave_cloud_config }}',
-        'agent_public_cloud_config': '{{ slave_public_cloud_config }}',
         # template variable for the generating advanced template cloud configs
         'cloud_config': '{{ cloud_config }}',
         'rexray_config_preset': 'aws'
@@ -214,10 +212,6 @@ cf_instance_groups = {
     'slave': {
         'report_name': 'SlaveServerGroup',
         'roles': ['slave']
-    },
-    'slave_public': {
-        'report_name': 'PublicSlaveServerGroup',
-        'roles': ['slave_public']
     }
 }
 
@@ -240,13 +234,6 @@ groups = {
             'exhibitor_address': Late('{ "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ] }'),
             'has_master_external_loadbalancer': 'true',
             'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ] }'),
-        }})),
-    'pub-agent': (
-        'slave_public', Source(entry={'must': {
-            'master_role': '',
-            'agent_role': Late('{ "Ref" : "PublicAgentRole" }'),
-            'exhibitor_storage_backend': 'agent_only_group_no_exhibitor',
-            'exhibitor_address': Late('{ "Ref" : "InternalMasterLoadBalancerDnsName" }'),
         }})),
     'priv-agent': (
         'slave', Source(entry={'must': {
@@ -498,7 +485,7 @@ def gen_simple_template(variant_prefix, filename, arguments, extra_source):
     # Add general services
     cloud_config = results.utils.add_services(cloud_config, 'coreos')
 
-    # Specialize for master, slave, slave_public
+    # Specialize for master, slave
     variant_cloudconfig = {}
     for variant, params in cf_instance_groups.items():
         cc_variant = deepcopy(cloud_config)
@@ -521,7 +508,6 @@ def gen_simple_template(variant_prefix, filename, arguments, extra_source):
         results.templates['cloudformation.json'],
         master_cloud_config=variant_cloudconfig['master'],
         slave_cloud_config=variant_cloudconfig['slave'],
-        slave_public_cloud_config=variant_cloudconfig['slave_public'])
 
     with logger.scope("Validating CloudFormation"):
         validate_cf(cloudformation)

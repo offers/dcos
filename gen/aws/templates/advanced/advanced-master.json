@@ -26,17 +26,9 @@
       "Description" : "\nSecurity group used by Private Agents, typically with limited access to the outside",
       "Type": "String"
     },
-    "PublicAgentSecurityGroup": {
-      "Description" : "\nPermissive Security group used by Public Agents",
-      "Type": "String"
-    },
     "MasterSecurityGroup": {
       "Description" : "\nSecurity group used by Master nodes",
       "Type": "String"
-    },
-    "PublicSubnet": {
-      "Description" : "\nSubnet ID for use by all public agent nodes",
-      "Type": "AWS::EC2::Subnet::Id"
     },
     "PrivateSubnet": {
       "Description" : "\nSubnet ID for use by all private agent nodes",
@@ -48,7 +40,7 @@
       "Description" : "\nRegion-specific instance type. E.g. m3.xlarge"
     },
     "CustomAMI": {
-      "Default": "default",
+      "Default": "ami-1ad0000c",
       "Type": "String",
       "Description": "\nExisting AMI in the deploy region which has all DC/OS pre-requisites installed or 'default'",
       "AllowedPattern": "(default|ami-[a-f0-9]{8})"
@@ -89,9 +81,6 @@
     "ClusterPackagesJson": { "default": { "default": {{ cluster_packages_json_var }} } },
     "RegionToAmi": {{ region_to_ami_mapping }},
     "Parameters": {
-      "PublicSubnetRange": {
-        "default": "10.0.4.0/22"
-      },
       "PrivateSubnetRange": {
         "default": "10.0.0.0/22"
       },
@@ -199,9 +188,10 @@
         "MinSize" : {{ num_masters }},
         "MaxSize" : {{ num_masters }},
         "DesiredCapacity" : {{ num_masters }},
-        "LoadBalancerNames" : [ { "Ref" : "ElasticLoadBalancer" }, { "Ref" : "InternalMasterLoadBalancer"} ],
-        "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
+        "LoadBalancerNames" : [ { "Ref" : "InternalMasterLoadBalancer"} ],
+        "VPCZoneIdentifier" : [{ "Ref" : "PrivateSubnet" }],
         "Tags" : [
+          {"Key" : "Name", "Value": { "Fn::Join": [" ", [{ "Ref" : "AWS::StackName" }, " Master"] }, "PropagateAtLaunch": true},
           {
             "Key" : "role",
             "Value" : "mesos-master",
@@ -237,10 +227,10 @@
             }
           ]
         },
-        "BlockDeviceMappings" : [ { "DeviceName" : "/dev/sdb", "VirtualName" : "ephemeral0" } ],
+        "BlockDeviceMappings" : [ { "DeviceName" : "/dev/sdb", "Ebs" : { "VolumeSize" : "512", "VolumeType" : "gp2" } ],
         "SecurityGroups" : [ { "Ref" : "MasterSecurityGroup" }, { "Ref" : "AdminSecurityGroup" } ],
         "IamInstanceProfile" : { "Ref" : "MasterInstanceProfile" },
-        "AssociatePublicIpAddress" : "true",
+        "AssociatePublicIpAddress" : "false",
         "InstanceType" : { "Ref" : "MasterInstanceType" },
         "UserData" : { "Fn::Base64" : { "Fn::Join": ["", [
           {{ cloud_config }}
@@ -252,8 +242,8 @@
     "InternalMasterLoadBalancer" : {
       "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
       "Properties" : {
-        "SecurityGroups": [{ "Ref": "LbSecurityGroup" }, { "Ref" : "AdminSecurityGroup" }, { "Ref" : "PrivateAgentSecurityGroup" }, { "Ref" : "PublicAgentSecurityGroup" }, { "Ref" : "MasterSecurityGroup" }],
-        "Subnets": [{ "Ref": "PublicSubnet" }],
+        "SecurityGroups": [{ "Ref": "LbSecurityGroup" }, { "Ref" : "AdminSecurityGroup" }, { "Ref" : "PrivateAgentSecurityGroup" }, { "Ref" : "MasterSecurityGroup" }],
+        "Subnets": [{ "Ref": "PrivateSubnet" }],
         "Scheme": "internal",
         "Listeners" : [
           {
@@ -300,43 +290,12 @@
           "Timeout" : "5"
         }
       }
-    },
-    "ElasticLoadBalancer" : {
-      "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
-      "Properties" : {
-        "SecurityGroups": [{ "Ref": "LbSecurityGroup" }, { "Ref" : "AdminSecurityGroup" }],
-        "Subnets": [{ "Ref": "PublicSubnet" }],
-        "Listeners" : [
-          {
-            "LoadBalancerPort" : "80",
-            "Protocol" : "TCP",
-            "InstancePort" : "80",
-            "InstanceProtocol" : "TCP"
-          },
-          {
-            "LoadBalancerPort" : "443",
-            "Protocol" : "TCP",
-            "InstancePort" : "443",
-            "InstanceProtocol" : "TCP"
-          }],
-        "HealthCheck" : {
-          "Target" : "TCP:5050",
-          "HealthyThreshold" : "2",
-          "UnhealthyThreshold" : "2",
-          "Interval" : "30",
-          "Timeout" : "5"
-        }
-      }
     }
   },
   "Outputs" : {
     "InternalMasterLoadBalancerDnsName": {
       "Description" : "Internal LB DNS Name",
       "Value" : { "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ]}
-    },
-    "MasterDNSName" : {
-      "Description" : "Mesos Master DNS Name",
-      "Value" : { "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ]}
     }
   }
 }
