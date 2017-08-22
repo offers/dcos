@@ -191,7 +191,7 @@
         "LoadBalancerNames" : [ { "Ref" : "InternalMasterLoadBalancer"} ],
         "VPCZoneIdentifier" : [{ "Ref" : "PrivateSubnet" }],
         "Tags" : [
-          {"Key" : "Name", "Value": { "Fn::Join": [" ", [{ "Ref" : "AWS::StackName" }, " Master"] }, "PropagateAtLaunch": true},
+          {"Key" : "Name", "Value": { "Fn::Join": [" ", [{ "Ref" : "AWS::StackName" }, " Master"]] }, "PropagateAtLaunch": true},
           {
             "Key" : "role",
             "Value" : "mesos-master",
@@ -227,7 +227,7 @@
             }
           ]
         },
-        "BlockDeviceMappings" : [ { "DeviceName" : "/dev/sdb", "Ebs" : { "VolumeSize" : "512", "VolumeType" : "gp2" } ],
+        "BlockDeviceMappings" : [ { "DeviceName" : "/dev/sdb", "Ebs" : { "VolumeSize" : "512", "VolumeType" : "gp2" }} ],
         "SecurityGroups" : [ { "Ref" : "MasterSecurityGroup" }, { "Ref" : "AdminSecurityGroup" } ],
         "IamInstanceProfile" : { "Ref" : "MasterInstanceProfile" },
         "AssociatePublicIpAddress" : "false",
