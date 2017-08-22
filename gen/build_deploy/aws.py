@@ -293,6 +293,7 @@ def render_cloudformation_transform(cf_template, transform_func=lambda x: x, **k
     # For now just moved from cloud_config_cf.py
     # TODO(cmaloney): Move with the logic that does this same thing in Azure
 
+    print(cf_template)
     template_str = gen.template.parse_str(cf_template).render(
         {k: transform_func(v) for k, v in kwds.items()}
     )
