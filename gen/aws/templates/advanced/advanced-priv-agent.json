@@ -21,7 +21,7 @@
             }
           ]
         },
-        "BlockDeviceMappings" : [ { "DeviceName" : "/dev/sdb", "Ebs" : { "VolumeSize" : "512", "VolumeType" : "gp2" } ],
+        "BlockDeviceMappings" : [ { "DeviceName" : "/dev/sdb", "Ebs" : { "VolumeSize" : "512", "VolumeType" : "gp2" }} ],
         "SecurityGroups" : [ { "Ref" : "PrivateAgentSecurityGroup" } ],
         "IamInstanceProfile" : { "Ref" : "PrivateAgentInstanceProfile" },
         "AssociatePublicIpAddress" : "false",
