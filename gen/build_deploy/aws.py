@@ -507,7 +507,7 @@ def gen_simple_template(variant_prefix, filename, arguments, extra_source):
     cloudformation = render_cloudformation(
         results.templates['cloudformation.json'],
         master_cloud_config=variant_cloudconfig['master'],
-        slave_cloud_config=variant_cloudconfig['slave'],
+        slave_cloud_config=variant_cloudconfig['slave'])
 
     with logger.scope("Validating CloudFormation"):
         validate_cf(cloudformation)
