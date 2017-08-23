@@ -232,7 +232,7 @@ groups = {
             'agent_role': '',
             'exhibitor_address': Late('{ "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ] }'),
             'has_master_external_loadbalancer': 'false',
-            'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ] }'),
+            'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ] }'),
         }})),
     'priv-agent': (
         'slave', Source(entry={'must': {
@@ -465,7 +465,7 @@ aws_simple_source = Source({
         'region_to_ami_mapping': gen_ami_mapping({"stable"}),
         'nat_ami_mapping': gen_ami_mapping({"natami"}),
         'has_master_external_loadbalancer': 'false',
-        'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ] }'),
+        'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ] }'),
     }
 })
 
