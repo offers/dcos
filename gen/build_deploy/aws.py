@@ -231,7 +231,7 @@ groups = {
             'master_role': Late('{ "Ref" : "MasterRole" }'),
             'agent_role': '',
             'exhibitor_address': Late('{ "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ] }'),
-            'has_master_external_loadbalancer': 'true',
+            'has_master_external_loadbalancer': 'false',
             'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ] }'),
         }})),
     'priv-agent': (
@@ -464,7 +464,7 @@ aws_simple_source = Source({
         's3_prefix': Late('{ "Ref" : "AWS::StackName" }'),
         'region_to_ami_mapping': gen_ami_mapping({"stable"}),
         'nat_ami_mapping': gen_ami_mapping({"natami"}),
-        'has_master_external_loadbalancer': 'true',
+        'has_master_external_loadbalancer': 'false',
         'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ] }'),
     }
 })
