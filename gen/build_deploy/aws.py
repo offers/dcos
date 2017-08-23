@@ -219,7 +219,6 @@ cf_instance_groups = {
 # this just being accessing the report-name key.
 aws_advanced_report_names = {
     'master': 'MasterServerGroup',
-    'pub-agent': 'PublicAgentServerGroup',
     'priv-agent': 'PrivateAgentServerGroup'
 }
 
@@ -408,7 +407,7 @@ def make_advanced_bundle(variant_args, extra_sources, template_name, cc_params):
 
 
 def gen_advanced_template(arguments, variant_prefix, reproducible_artifact_path, os_type):
-    for node_type in ['master', 'priv-agent', 'pub-agent']:
+    for node_type in ['master', 'priv-agent']:
         # TODO(cmaloney): This forcibly overwriting arguments might overwrite a user set argument
         # without noticing (such as exhibitor_storage_backend)
         node_template_id, node_source = groups[node_type]
