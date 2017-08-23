@@ -93,9 +93,6 @@
                     "KeyName": {
                         "Ref": "KeyName"
                     },
-                    "PublicSubnet": {
-                      "Ref": "PublicSubnet"
-                    },
                     "PrivateSubnet": {
                       "Ref": "PrivateSubnet"
                     },
@@ -108,9 +105,6 @@
                     "LbSecurityGroup": {
                       "Fn::GetAtt" : [ "Infrastructure", "Outputs.LbSecurityGroupId" ]
                     },
-                    "PublicAgentSecurityGroup": {
-                      "Fn::GetAtt" : [ "Infrastructure", "Outputs.PublicAgentSecurityGroupId" ]
-                    },
                     "PrivateAgentSecurityGroup": {
                       "Fn::GetAtt" : [ "Infrastructure", "Outputs.PrivateAgentSecurityGroupId" ]
                     },
@@ -122,45 +116,6 @@
                     },
                     "ExhibitorS3Bucket": {
                       "Fn::GetAtt" : [ "Infrastructure", "Outputs.ExhibitorS3BucketId" ]
-                    }
-{% switch oauth_available %}
-{% case "true" %}
-                    ,
-                    "OAuthEnabled": {
-                      "Ref": "OAuthEnabled"
-                    }
-{% case "false" %}
-{% endswitch %}
-               },
-               "TimeoutInMinutes": "60"
-           }
-       },
-       "PublicAgentStack": {
-           "DependsOn": ["Infrastructure", "MasterStack"],
-           "Type": "AWS::CloudFormation::Stack",
-           "Properties": {
-               "TemplateURL": "{{ cloudformation_s3_url_full }}/{{ variant_prefix }}{{ os_type }}-advanced-pub-agent.json",
-               "Parameters": {
-                    "KeyName": {
-                        "Ref": "KeyName"
-                    },
-                    "InternalMasterLoadBalancerDnsName": {
-                      "Fn::GetAtt" : [ "MasterStack", "Outputs.InternalMasterLoadBalancerDnsName" ]
-                    },
-                    "PublicAgentSecurityGroup": {
-                      "Fn::GetAtt" : [ "Infrastructure", "Outputs.PublicAgentSecurityGroupId" ]
-                    },
-                    "PublicSubnet": {
-                      "Ref": "PublicSubnet"
-                    },
-                    "PublicAgentInstanceType": {
-                      "Ref": "PublicAgentInstanceType"
-                    },
-                    "PublicAgentInstanceCount": {
-                      "Ref": "PublicAgentInstanceCount"
-                    },
-                    "CustomAMI": {
-                      "Ref": "CustomAMI"
                     }
 {% switch oauth_available %}
 {% case "true" %}
