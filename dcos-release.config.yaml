@@ -1,7 +1,0 @@
-storage:
-  local:
-    kind: local_path
-    path: /home/chris/dcos-artifacts
-options:
-  preferred: local
-  cloudformation_s3_url: https://s3-us-west-2.amazonaws.com/downloads.dcos.io/dcos

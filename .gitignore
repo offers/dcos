@@ -1,3 +1,4 @@
+dcos-release.config.yaml
 __pycache__
 test_util/dcos-vagrant/
 this
