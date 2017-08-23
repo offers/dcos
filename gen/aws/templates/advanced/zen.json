@@ -78,9 +78,6 @@
                     "PrivateSubnet": {
                       "Ref": "PrivateSubnet"
                     },
-                    "InternetGateway": {
-                      "Ref": "InternetGateway"
-                    },
                     "AdminLocation": {
                       "Ref": "AdminLocation"
                     }
