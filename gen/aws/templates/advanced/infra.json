@@ -21,10 +21,6 @@
     "Vpc": {
       "Description" : "\nExisting VPC to use. Nodes will be launched using subnets and Internet Gateway under this VPC",
       "Type": "AWS::EC2::VPC::Id"
-    },
-    "PrivateSubnet": {
-      "Description" : "\nSubnet ID for use by all private agent nodes",
-      "Type": "AWS::EC2::Subnet::Id"
     }
   },
     "Mappings": {

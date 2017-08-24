@@ -30,8 +30,12 @@
       "Description" : "\nSecurity group used by Master nodes",
       "Type": "String"
     },
-    "PrivateSubnet": {
-      "Description" : "\nSubnet ID for use by all private agent nodes",
+    "PrivateSubnet1": {
+      "Description" : "\nSubnet ID for use by some private agent nodes",
+      "Type": "String"
+    },
+    "PrivateSubnet2": {
+      "Description" : "\nSubnet ID for use by some private agent nodes",
       "Type": "String"
     },
     "MasterInstanceType": {
@@ -189,9 +193,9 @@
         "MaxSize" : {{ num_masters }},
         "DesiredCapacity" : {{ num_masters }},
         "LoadBalancerNames" : [ { "Ref" : "InternalMasterLoadBalancer"} ],
-        "VPCZoneIdentifier" : [{ "Ref" : "PrivateSubnet" }],
+        "VPCZoneIdentifier" : [{ "Ref" : "PrivateSubnet1" }, { "Ref" : "PrivateSubnet2" }],
         "Tags" : [
-          {"Key" : "Name", "Value": { "Fn::Join": [" ", [{ "Ref" : "AWS::StackName" }, " Master"]] }, "PropagateAtLaunch": true},
+          {"Key" : "Name", "Value": { "Fn::Join": [" ", [{ "Ref" : "AWS::StackName" }, "Master"]] }, "PropagateAtLaunch": true},
           {
             "Key" : "role",
             "Value" : "mesos-master",
@@ -243,7 +247,7 @@
       "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
       "Properties" : {
         "SecurityGroups": [{ "Ref": "LbSecurityGroup" }, { "Ref" : "AdminSecurityGroup" }, { "Ref" : "PrivateAgentSecurityGroup" }, { "Ref" : "MasterSecurityGroup" }],
-        "Subnets": [{ "Ref": "PrivateSubnet" }],
+        "Subnets": [{ "Ref": "PrivateSubnet1" }, { "Ref": "PrivateSubnet2" }],
         "Scheme": "internal",
         "Listeners" : [
           {
@@ -294,6 +298,10 @@
   },
   "Outputs" : {
     "InternalMasterLoadBalancerDnsName": {
+      "Description" : "Internal LB DNS Name",
+      "Value" : { "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ]}
+    },
+    "MasterDnsName": {
       "Description" : "Internal LB DNS Name",
       "Value" : { "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ]}
     }
