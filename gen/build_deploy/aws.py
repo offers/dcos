@@ -38,10 +38,9 @@ aws_base_source = Source(entry={
     'default': {
         'platform': 'aws',
         'resolvers': '["169.254.169.253"]',
-        'num_private_slaves': '5',
-        'num_public_slaves': '1',
+        'num_private_slaves': '11',
         'os_type': '',
-        'aws_masters_have_public_ip': 'true',
+        'aws_masters_have_public_ip': 'false',
         'enable_docker_gc': 'true'
     },
     'must': {
@@ -65,7 +64,6 @@ aws_base_source = Source(entry={
         # The cloud_config template variables pertaining to "cloudformation.json"
         'master_cloud_config': '{{ master_cloud_config }}',
         'agent_private_cloud_config': '{{ slave_cloud_config }}',
-        'agent_public_cloud_config': '{{ slave_public_cloud_config }}',
         # template variable for the generating advanced template cloud configs
         'cloud_config': '{{ cloud_config }}',
         'rexray_config_preset': 'aws'
@@ -127,61 +125,61 @@ region_to_ami_map = {
     'ap-northeast-1': {
         'coreos': 'ami-86f1b9e1',
         'stable': 'ami-86f1b9e1',
-        'el7': 'ami-5942133e',
+        'el7': 'ami-1d50567a',
         'natami': 'ami-55c29e54'
     },
     'ap-southeast-1': {
         'coreos': 'ami-27cc7d44',
         'stable': 'ami-27cc7d44',
-        'el7': 'ami-83ea59e0',
+        'el7': 'ami-f4a12097',
         'natami': 'ami-b082dae2'
     },
     'ap-southeast-2': {
         'coreos': 'ami-5baeae38',
         'stable': 'ami-5baeae38',
-        'el7': 'ami-7f393b1c',
+        'el7': 'ami-0d50476e',
         'natami': 'ami-996402a3'
     },
     'eu-central-1': {
         'coreos': 'ami-4733f928',
         'stable': 'ami-4733f928',
-        'el7': 'ami-9e13c7f1',
+        'el7': 'ami-d47fa4bb',
         'natami': 'ami-204c7a3d'
     },
     'eu-west-1': {
         'coreos': 'ami-89f6dbef',
         'stable': 'ami-89f6dbef',
-        'el7': 'ami-41b89327',
+        'el7': 'ami-b6c8ded0',
         'natami': 'ami-3760b040'
     },
     'sa-east-1': {
         'coreos': 'ami-c51573a9',
         'stable': 'ami-c51573a9',
-        'el7': 'ami-6d600101',
+        'el7': 'ami-41640d2d',
         'natami': 'ami-b972dba4'
     },
     'us-east-1': {
         'coreos': 'ami-42ad7d54',
         'stable': 'ami-42ad7d54',
-        'el7': 'ami-84862092',
+        'el7': 'ami-5f5d1449',
         'natami': 'ami-4c9e4b24'
     },
     'us-gov-west-1': {
         'coreos': 'ami-a846fcc9',
         'stable': 'ami-a846fcc9',
-        'el7': 'ami-8dce4bec',
+        'el7': 'ami-35b43354',
         'natami': 'ami-e8ab1489'
     },
     'us-west-1': {
         'coreos': 'ami-1a1b457a',
         'stable': 'ami-1a1b457a',
-        'el7': 'ami-794f1619',
+        'el7': 'ami-54614234',
         'natami': 'ami-2b2b296e'
     },
     'us-west-2': {
         'coreos': 'ami-2551d145',
         'stable': 'ami-2551d145',
-        'el7': 'ami-4953df29',
+        'el7': 'ami-61acce01',
         'natami': 'ami-bb69128b'
     }
 }
@@ -214,10 +212,6 @@ cf_instance_groups = {
     'slave': {
         'report_name': 'SlaveServerGroup',
         'roles': ['slave']
-    },
-    'slave_public': {
-        'report_name': 'PublicSlaveServerGroup',
-        'roles': ['slave_public']
     }
 }
 
@@ -225,7 +219,6 @@ cf_instance_groups = {
 # this just being accessing the report-name key.
 aws_advanced_report_names = {
     'master': 'MasterServerGroup',
-    'pub-agent': 'PublicAgentServerGroup',
     'priv-agent': 'PrivateAgentServerGroup'
 }
 
@@ -238,15 +231,8 @@ groups = {
             'master_role': Late('{ "Ref" : "MasterRole" }'),
             'agent_role': '',
             'exhibitor_address': Late('{ "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ] }'),
-            'has_master_external_loadbalancer': 'true',
-            'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ] }'),
-        }})),
-    'pub-agent': (
-        'slave_public', Source(entry={'must': {
-            'master_role': '',
-            'agent_role': Late('{ "Ref" : "PublicAgentRole" }'),
-            'exhibitor_storage_backend': 'agent_only_group_no_exhibitor',
-            'exhibitor_address': Late('{ "Ref" : "InternalMasterLoadBalancerDnsName" }'),
+            'has_master_external_loadbalancer': 'false',
+            'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ] }'),
         }})),
     'priv-agent': (
         'slave', Source(entry={'must': {
@@ -306,6 +292,7 @@ def render_cloudformation_transform(cf_template, transform_func=lambda x: x, **k
     # For now just moved from cloud_config_cf.py
     # TODO(cmaloney): Move with the logic that does this same thing in Azure
 
+    print(cf_template)
     template_str = gen.template.parse_str(cf_template).render(
         {k: transform_func(v) for k, v in kwds.items()}
     )
@@ -420,7 +407,7 @@ def make_advanced_bundle(variant_args, extra_sources, template_name, cc_params):
 
 
 def gen_advanced_template(arguments, variant_prefix, reproducible_artifact_path, os_type):
-    for node_type in ['master', 'priv-agent', 'pub-agent']:
+    for node_type in ['master', 'priv-agent']:
         # TODO(cmaloney): This forcibly overwriting arguments might overwrite a user set argument
         # without noticing (such as exhibitor_storage_backend)
         node_template_id, node_source = groups[node_type]
@@ -477,8 +464,8 @@ aws_simple_source = Source({
         's3_prefix': Late('{ "Ref" : "AWS::StackName" }'),
         'region_to_ami_mapping': gen_ami_mapping({"stable"}),
         'nat_ami_mapping': gen_ami_mapping({"natami"}),
-        'has_master_external_loadbalancer': 'true',
-        'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "ElasticLoadBalancer", "DNSName" ] }'),
+        'has_master_external_loadbalancer': 'false',
+        'master_external_loadbalancer': Late('{ "Fn::GetAtt" : [ "InternalMasterLoadBalancer", "DNSName" ] }'),
     }
 })
 
@@ -498,7 +485,7 @@ def gen_simple_template(variant_prefix, filename, arguments, extra_source):
     # Add general services
     cloud_config = results.utils.add_services(cloud_config, 'coreos')
 
-    # Specialize for master, slave, slave_public
+    # Specialize for master, slave
     variant_cloudconfig = {}
     for variant, params in cf_instance_groups.items():
         cc_variant = deepcopy(cloud_config)
@@ -520,8 +507,7 @@ def gen_simple_template(variant_prefix, filename, arguments, extra_source):
     cloudformation = render_cloudformation(
         results.templates['cloudformation.json'],
         master_cloud_config=variant_cloudconfig['master'],
-        slave_cloud_config=variant_cloudconfig['slave'],
-        slave_public_cloud_config=variant_cloudconfig['slave_public'])
+        slave_cloud_config=variant_cloudconfig['slave'])
 
     with logger.scope("Validating CloudFormation"):
         validate_cf(cloudformation)

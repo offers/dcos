@@ -21,7 +21,7 @@
             }
           ]
         },
-        "BlockDeviceMappings" : [ { "DeviceName" : "/dev/sdb", "VirtualName" : "ephemeral0" } ],
+        "BlockDeviceMappings" : [ { "DeviceName" : "/dev/sdb", "Ebs" : { "VolumeSize" : "512", "VolumeType" : "gp2" }} ],
         "SecurityGroups" : [ { "Ref" : "PrivateAgentSecurityGroup" } ],
         "IamInstanceProfile" : { "Ref" : "PrivateAgentInstanceProfile" },
         "AssociatePublicIpAddress" : "false",
@@ -77,6 +77,7 @@
           }
         ],
         "Tags": [
+          {"Key" : "Name", "Value": { "Fn::Join": [" ", [{ "Ref" : "AWS::StackName" }, "Agent"]] }, "PropagateAtLaunch": true},
           {
             "Value": "mesos-private-agent",
             "Key": "role",
